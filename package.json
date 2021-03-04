@@ -1,0 +1,22 @@
+{
+    "name": "ws-212s",
+    "version": "1.0.0",
+    "description": "ssh config",
+    "main": "dist/main.js",
+    "scripts": {
+        "build": "tsc"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/MamoruDS/ws-212S.git"
+    },
+    "author": "MamoruDS",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/MamoruDS/ws-212S/issues"
+    },
+    "homepage": "https://github.com/MamoruDS/ws-212S#readme",
+    "devDependencies": {
+        "typescript": "^4.2.2"
+    }
+}
