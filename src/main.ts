@@ -19,8 +19,13 @@ type HostConfig = {
     strictHostKeyChecking: boolean
     acceptKeys: string[]
     allowPassword: boolean
+    groups: string[]
     comment: string
 }
+
+type HostSTO = {
+    alias: string
+} & HostConfig
 
 class DuplicateErr extends Error {
     constructor(alias: string) {
@@ -29,7 +34,7 @@ class DuplicateErr extends Error {
 }
 
 class Host {
-    group: string[]
+    groups: string[]
     comment: string
     alias: string
     host: string
@@ -46,6 +51,7 @@ class Host {
                 strictHostKeyChecking: true,
                 acceptKeys: [],
                 allowPassword: CONF.defaultAllowPassword,
+                groups: [],
                 comment: '',
             },
             ...config,
@@ -61,6 +67,7 @@ class Host {
         this.acceptKeys = config.acceptKeys
         this.allowPassword = config.allowPassword
         this.comment = config.comment.replace('\n', '')
+        this.groups = config.groups
     }
     private _space(): string {
         return ' '.repeat(CONF.space)
@@ -83,8 +90,18 @@ class Host {
                 .join('\n')
         )
     }
-    toJSON(): Record<string, unknown> {
-        return {}
+    toJSON(): HostSTO {
+        return {
+            alias: this.alias,
+            host: this.host,
+            port: this.port,
+            user: this.user,
+            strictHostKeyChecking: this.strictHostKeyChecking,
+            acceptKeys: this.acceptKeys,
+            allowPassword: this.allowPassword,
+            groups: this.groups,
+            comment: this.comment,
+        }
     }
 }
 
@@ -93,8 +110,22 @@ class Hosts {
     constructor() {
         this.items = []
     }
-    load(): void {}
-    dump(): Record<string, unknown>[] {
+    load(profile: HostSTO[], ignoreDuplicate: boolean): void {
+        for (const h of profile) {
+            try {
+                this.add(h.alias, h)
+            } catch (e) {
+                if (e instanceof DuplicateErr) {
+                    if (ignoreDuplicate) {
+                        continue
+                    } else {
+                        throw e
+                    }
+                }
+            }
+        }
+    }
+    dump(): HostSTO[] {
         return this.items.map((h) => h.toJSON())
     }
     private findIdx(alias: string): number {
