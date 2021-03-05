@@ -1,0 +1,6 @@
+account_id = ""
+kv_namespaces = [{binding = "KV", id = ""}]
+name = "sshconf"
+type = "webpack"
+webpack_config = "webpack.config.js"
+workers_dev = true
