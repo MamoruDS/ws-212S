@@ -73,8 +73,7 @@ class Host {
         return ' '.repeat(CONF.space)
     }
     toString(key?: string): string {
-        return (
-            `# ${this.comment}\n` +
+        const info: string =
             `Host ${this.alias}\n` +
             [
                 `HostName ${this.host}`,
@@ -88,7 +87,7 @@ class Host {
                 .filter((s) => s != undefined)
                 .map((s) => this._space() + s)
                 .join('\n')
-        )
+        return this.comment ? `# ${this.comment}\n` + info : info
     }
     toJSON(): HostSTO {
         return {
