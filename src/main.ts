@@ -80,7 +80,14 @@ class Host {
         this._load(conf)
         return this
     }
-    toString(key?: string): string {
+    toString(
+        keys: string[] = [],
+        ignoreAcceptKey?: boolean
+    ): string | undefined {
+        const key = keys.filter((k) => this.acceptKeys.indexOf(k) != -1)[0]
+        if (!key && !this.allowPassword && !ignoreAcceptKey) {
+            return undefined
+        }
         const info: string =
             `Host ${this.alias}\n` +
             [
@@ -165,19 +172,10 @@ class Hosts {
             this.items.splice(idx, 1)
         }
     }
-    out(keyName: string, ignoreNoneKeyHost: boolean = false): string {
+    out(mochiKey: string[]): string {
         return this.items
-            .filter((h) => {
-                if (h.acceptKeys.length == 0) {
-                    if (ignoreNoneKeyHost) {
-                        return false
-                    } else {
-                        return h.allowPassword
-                    }
-                }
-                return h.acceptKeys.indexOf(keyName) != -1
-            })
-            .map((h) => h.toString(h.acceptKeys.length ? keyName : undefined))
+            .map((h) => h.toString(mochiKey))
+            .filter((h) => typeof h != 'undefined')
             .join('\n\n')
     }
 }
