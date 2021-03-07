@@ -1,6 +1,6 @@
 const CONF = {
-    defaultUser: 'root',
-    defaultPort: 22,
+    defaultUser: undefined,
+    defaultPort: undefined,
     defaultAllowPassword: true,
     keyPath: '~/.ssh/',
     space: 4,
@@ -14,8 +14,8 @@ const CONF = {
 
 type HostConfig = {
     host: string
-    port: number
-    user: string
+    port: number | undefined
+    user: string | undefined
     strictHostKeyChecking: boolean
     acceptKeys: string[]
     allowPassword: boolean
@@ -44,7 +44,7 @@ class Host {
     acceptKeys: string[]
     allowPassword: boolean
     constructor(alias: string, config: Partial<HostConfig> = {}) {
-        config = {
+        const conf = {
             ...{
                 port: CONF.defaultPort,
                 user: CONF.defaultUser,
@@ -55,11 +55,17 @@ class Host {
                 comment: '',
             },
             ...config,
-        }
+        } as HostConfig
         if (!config.host) {
             // panic
         }
         this.alias = alias
+        this._load(conf)
+    }
+    private _space(): string {
+        return ' '.repeat(CONF.space)
+    }
+    private _load(config: HostConfig) {
         this.host = config.host
         this.port = config.port
         this.user = config.user
@@ -69,16 +75,18 @@ class Host {
         this.comment = config.comment.replace('\n', '')
         this.groups = config.groups
     }
-    private _space(): string {
-        return ' '.repeat(CONF.space)
+    update(config: Partial<HostConfig>): Host {
+        const conf = { ...this.toJSON(), ...config } as HostConfig
+        this._load(conf)
+        return this
     }
     toString(key?: string): string {
         const info: string =
             `Host ${this.alias}\n` +
             [
                 `HostName ${this.host}`,
-                `User ${this.user}`,
-                `Port ${this.port}`,
+                this.user ? `User ${this.user}` : undefined,
+                this.port ? `Port ${this.port}` : undefined,
                 this.strictHostKeyChecking
                     ? undefined
                     : 'StrictHostKeyChecking no',
