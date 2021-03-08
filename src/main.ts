@@ -21,6 +21,7 @@ type HostConfig = {
     allowPassword: boolean
     groups: string[]
     comment: string
+    hide: boolean
 }
 
 type HostSTO = {
@@ -34,8 +35,6 @@ class DuplicateErr extends Error {
 }
 
 class Host {
-    groups: string[]
-    comment: string
     alias: string
     host: string
     port: number
@@ -43,6 +42,9 @@ class Host {
     strictHostKeyChecking: boolean
     acceptKeys: string[]
     allowPassword: boolean
+    comment: string
+    groups: string[]
+    hide: boolean
     constructor(alias: string, config: Partial<HostConfig> = {}) {
         const conf = {
             ...{
@@ -53,6 +55,7 @@ class Host {
                 allowPassword: CONF.defaultAllowPassword,
                 groups: [],
                 comment: '',
+                hide: false
             },
             ...config,
         } as HostConfig
@@ -74,6 +77,7 @@ class Host {
         this.allowPassword = config.allowPassword
         this.comment = config.comment.replace('\n', '')
         this.groups = config.groups
+        this.hide = config.hide
     }
     update(config: Partial<HostConfig>): Host {
         const conf = { ...this.toJSON(), ...config } as HostConfig
@@ -115,6 +119,7 @@ class Host {
             allowPassword: this.allowPassword,
             groups: this.groups,
             comment: this.comment,
+            hide: this.hide
         }
     }
 }
