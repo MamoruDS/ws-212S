@@ -1,6 +1,6 @@
 import * as CF from './cf'
 import { genToken } from './utils'
-import { config, Hosts } from '../../dist/main'
+import { config as CONF, Hosts } from '../../dist/main'
 
 declare global {
     const KV: CF.KV
@@ -41,30 +41,38 @@ export async function handleRequest(req: Request): Promise<Response> {
             status: status,
         })
     }
-    let res: string = ''
+    let res: string = '' // TODO:
     try {
         const _res = {} as Record<string, unknown>
-        const body = await req.json()
+        const url = new URL(req.url)
         const token = await sto.get('SSHCONF_TOKEN', 'text', genToken(6), true)
-        if (body['token'] != token) {
-            panic(401, _res)
-        }
-        const mochiKey = body['key']
+        const config = JSON.parse(url.searchParams.get('config') || '{}')
+        Object.assign(CONF, config)
+        _res['config'] = CONF
         const hosts = new Hosts()
         const profile = await sto.get('SSHCONF_PROFILE', 'text', '[]', true)
         hosts.load(JSON.parse(profile), true)
-        if (method == 'POST') {
-            _res['data'] = hosts.out(mochiKey)
+        if (url.searchParams.get('token') != token) {
+            return panic(401, { errMsg: 'Unauthorized' })
+        }
+        if (method == 'GET') {
+            const format = url.searchParams.get('format')
+            const mochiKey = (url.searchParams.get('keys') || '').split(',')
+            if (format == 'file') {
+                res = hosts.out(mochiKey)
+            }
+            _res['data'] = hosts.dump()
         } else {
+            const body = await req.json()
             const host = body['host']
-            if (method == 'PUT') {
+            if (method == 'POST') {
                 const { alias } = host
-                _res['data'] = hosts.add(alias, host).toString(mochiKey)
+                _res['data'] = hosts.add(alias, host).toJSON()
             }
             if (method == 'PATCH') {
                 const { alias } = host
                 const h = hosts.get(alias)
-                _res['data'] = h.update(host)
+                _res['data'] = h.update(host).toJSON()
             }
             if (method == 'DELETE') {
                 const { alias } = host
@@ -72,14 +80,11 @@ export async function handleRequest(req: Request): Promise<Response> {
             }
             await sto.set('SSHCONF_PROFILE', JSON.stringify(hosts.dump()))
         }
-        const t = body['type']
-        if (t == 'file' && method == 'POST') {
-            res = hosts.out(mochiKey)
-        } else {
+        if (!res) {
             res = JSON.stringify(_res, null, 4)
         }
     } catch (e) {
-        panic(400, { errMsg: e.message })
+        return panic(400, { errMsg: e.message })
     }
     return new Response(res)
 }
