@@ -55,7 +55,7 @@ class Host {
                 allowPassword: CONF.defaultAllowPassword,
                 groups: [],
                 comment: '',
-                hide: false
+                hide: false,
             },
             ...config,
         } as HostConfig
@@ -101,7 +101,7 @@ class Host {
                 this.strictHostKeyChecking
                     ? undefined
                     : 'StrictHostKeyChecking no',
-                key ? `IdentityFile ${CONF.keyPath + key}` : undefined, // TODO:
+                key ? `IdentityFile ${CONF.keyPath + key}` : undefined,
             ]
                 .filter((s) => s != undefined)
                 .map((s) => this._space() + s)
@@ -119,7 +119,7 @@ class Host {
             allowPassword: this.allowPassword,
             groups: this.groups,
             comment: this.comment,
-            hide: this.hide
+            hide: this.hide,
         }
     }
 }
