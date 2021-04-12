@@ -145,7 +145,7 @@ class Hosts {
         }
     }
     dump(): HostSTO[] {
-        return this.items.map((h) => h.toJSON())
+        return this.format([], 'json')
     }
     private findIdx(alias: string): number {
         for (const idx in this.items) {
@@ -178,10 +178,20 @@ class Hosts {
         }
     }
     out(mochiKey: string[]): string {
-        return this.items
-            .map((h) => h.toString(mochiKey))
-            .filter((h) => typeof h != 'undefined')
-            .join('\n\n')
+        return this.format(mochiKey, 'file')
+    }
+    format(mochiKey: string[], type: 'file'): string
+    format(mochiKey: string[], type: 'json'): HostSTO[]
+    format(mochiKey: string[], type: 'file' | 'json'): any {
+        if (type == 'file') {
+            return this.items
+                .map((h) => h.toString(mochiKey))
+                .filter((h) => typeof h != 'undefined')
+                .join('\n\n')
+        }
+        if (type == 'json') {
+            return this.items.map((h) => h.toJSON())
+        }
     }
 }
 
