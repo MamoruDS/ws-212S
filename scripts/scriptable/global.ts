@@ -46,12 +46,16 @@ namespace Scriptable {
 }
 
 declare global {
-    const Safari: Scriptable.Safari
+    const Color: Scriptable.Color
     const FileManager: Scriptable.FileManager
     const Request: Scriptable.Request
+    const Safari: Scriptable.Safari
     const UITable: Scriptable.UITable
     const UITableRow: Scriptable.UITableRow
     const log: (msg: string) => void
+    // types
+    type Color = Scriptable.Color
+    type UITableRow = Scriptable.UITableRow
 }
 
 export {}

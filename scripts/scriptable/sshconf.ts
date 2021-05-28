@@ -1,3 +1,5 @@
+type LocalColor = [string, number]
+
 const CONF = {
     token: '',
     blink: '',
@@ -6,6 +8,14 @@ const CONF = {
     config: {
         keyPath: '',
     },
+    lightColor: [
+        ['#ffffff', 1],
+        ['#f4f5f5', 1],
+    ],
+    darkColor: [
+        ['#2b2c2d', 1],
+        ['#212223', 1],
+    ],
 } as {
     token: string
     blink: string
@@ -16,6 +26,8 @@ const CONF = {
         defaultPort: number
         keyPath: string
     }>
+    lightColor: LocalColor[]
+    darkColor: LocalColor[]
 }
 
 const cmd = (cmd: string): void => {
@@ -84,13 +96,24 @@ const run = async (forceUpdate = false) => {
     })
 
     const table = new UITable()
+
+    let _CID = 0
+    const _addRow = (row: UITableRow) => {
+        row.backgroundColor = Color.dynamic(
+            new Color(...CONF.lightColor[_CID % CONF.lightColor.length]),
+            new Color(...CONF.darkColor[_CID % CONF.darkColor.length])
+        )
+        table.addRow(row)
+        _CID += 1
+    }
+
     if (!forceUpdate) {
         const update = new UITableRow()
         update.addText('force update profile from workers')
         update.onSelect = () => {
             run(true)
         }
-        table.addRow(update)
+        _addRow(update)
     }
     for (const h of hosts) {
         const host = new UITableRow()
@@ -98,7 +121,7 @@ const run = async (forceUpdate = false) => {
         host.onSelect = () => {
             cmd(`ssh ${h}`)
         }
-        table.addRow(host)
+        _addRow(host)
     }
 
     table.present()
