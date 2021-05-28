@@ -52,6 +52,7 @@ const run = async (forceUpdate = false) => {
         fs.read('sshconf', '{"lastUpdate":0, "hosts":[]}')
     )
     if (Date.now() - (profile.lastUpdate || 0) > 604800000 || forceUpdate) {
+        profile.hosts = []
         log('profile expired, fetching workers...')
         let uri = `https://sshconf.mamoru.workers.dev/?token=${
             CONF.token
