@@ -77,7 +77,7 @@ const run = async (forceUpdate = false) => {
     };
     if (!forceUpdate) {
         const update = new UITableRow();
-        update.addText('force update profile from workers');
+        update.addText('🧩 Force update profile from Workers');
         update.onSelect = () => {
             run(true);
         };
