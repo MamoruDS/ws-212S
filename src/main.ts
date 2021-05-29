@@ -24,6 +24,11 @@ type HostConfig = {
     hide: boolean
 }
 
+type FormatConfig = {
+    ignoreHiddenHost: boolean
+    ignoreAcceptKey: boolean
+}
+
 type HostSTO = {
     alias: string
 } & HostConfig
@@ -177,20 +182,42 @@ class Hosts {
             this.items.splice(idx, 1)
         }
     }
-    out(mochiKey: string[]): string {
-        return this.format(mochiKey, 'file')
+    out(mochiKey: string[], config?: Partial<FormatConfig>): string {
+        return this.format(mochiKey, 'file', config)
     }
-    format(mochiKey: string[], type: 'file'): string
-    format(mochiKey: string[], type: 'json'): HostSTO[]
-    format(mochiKey: string[], type: 'file' | 'json'): any {
+    format(
+        mochiKey: string[],
+        type: 'file',
+        config?: Partial<FormatConfig>
+    ): string
+    format(
+        mochiKey: string[],
+        type: 'json',
+        config?: Partial<FormatConfig>
+    ): HostSTO[]
+    format(
+        mochiKey: string[],
+        type: 'file' | 'json',
+        config: Partial<FormatConfig> = {}
+    ): any {
+        config = {
+            ...config,
+            ...{ ignoreHiddenHost: type == 'file', ignoreAcceptKey: false },
+        }
+        const hosts = this.items.filter((h) => {
+            if (config.ignoreHiddenHost) {
+                return !h.hide
+            }
+            return true
+        })
         if (type == 'file') {
-            return this.items
-                .map((h) => h.toString(mochiKey))
+            return hosts
+                .map((h) => h.toString(mochiKey, config.ignoreAcceptKey))
                 .filter((h) => typeof h != 'undefined')
                 .join('\n\n')
         }
         if (type == 'json') {
-            return this.items.map((h) => h.toJSON())
+            return hosts.map((h) => h.toJSON())
         }
     }
 }

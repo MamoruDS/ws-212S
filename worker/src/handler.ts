@@ -59,7 +59,9 @@ export async function handleRequest(req: Request): Promise<Response> {
             const format = url.searchParams.get('format')
             const mochiKey = (url.searchParams.get('keys') || '').split(',')
             if (format == 'file') {
-                res = hosts.out(mochiKey)
+                // alt:
+                // res = hosts.out(mochiKey)
+                res = hosts.format(mochiKey, 'file', { ignoreHiddenHost: true })
             }
             _res['data'] = hosts.dump()
         } else {
